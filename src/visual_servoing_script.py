@@ -9,9 +9,11 @@ from sensor_msgs.msg import Image
 
 # global_name = rospy.get_param("/vs/video_feed_topic")
 
+focal_length_px = 580
+
 
 class VS:
-    def __init__ (self):
+    def __init__ (self, focal_length_px):
         # Subscriber
         self.sub_cam = rospy.Subscriber('/rms/camera1/image_raw', 
             Image, self.callback_cam)
@@ -20,6 +22,7 @@ class VS:
         self.cv_image = numpy.ndarray((480, 640, 4)) # Image()
         self.last_image = Image()
         self.triple_jacobian = numpy.empty((0, 6), float)
+        self.focal_length_px = focal_length_px
 
     def callback_cam(self, image_raw):
         try:
@@ -27,6 +30,23 @@ class VS:
             # self.display_image("bonsoir", self.cv_image)
         except CvBridgeError as e:
             print(e)
+
+    def compute_ij(self, list_of_point):
+        self.clear_jacobian()
+        for point in list_of_point:
+            if isinstance (point, Point):
+                jacobian_matrix = numpy.matrix([
+                    [-self.focal_length_px/point.Z, 0, point.u/point.Z, (point.u*point.v)/self.focal_length_px, -(self.focal_length_px+numpy.sqrt(point.u)/self.focal_length_px), point.v],
+                    [0, -self.focal_length_px/point.Z, point.v/point.Z, self.focal_length_px+numpy.sqrt(point.v)/self.focal_length_px, -(point.u*point.v)/self.focal_length_px, -point.u]])
+
+                self.triple_jacobian = numpy.append(self.triple_jacobian, 
+                    jacobian_matrix, axis=0)
+            else:
+                rospy.loginfo("The argment passed in compute_ij, is not Point")
+        print("robot_0.triple_jacobian size is: " + str(self.triple_jacobian.shape))
+
+    def clear_jacobian(self):
+        self.triple_jacobian = numpy.empty((0, 6), float)
 
     def display_image(self, name, img):
         cv2.imshow(name, img)
@@ -91,13 +111,14 @@ if __name__ == '__main__':
     rate = rospy.Rate(10)
 
     rospy.loginfo("Creation of instance of VS")
-    robot_0 = VS()
+    robot_0 = VS(focal_length_px=580)
     rospy.on_shutdown(shutdown_function)
 
     rospy.loginfo("Creation of three instance of Point")
     point_1 = Point("Point_1", 200, 200, 200)
     point_2 = Point("Point_2", 400, 200, 200)
     point_3 = Point("Point_3", 300, 400, 200)
+    list_of_point = [point_1, point_2, point_3]
 
     rospy.loginfo("Entering loop")
     while not rospy.is_shutdown():
@@ -108,8 +129,10 @@ if __name__ == '__main__':
             point_2.add_circle(robot_0.cv_image)
             point_3.add_circle(robot_0.cv_image)
             robot_0.display_image("robot_0", robot_0.cv_image)
-            rate.sleep()
 
+            robot_0.compute_ij(list_of_point)
+
+            rate.sleep()
             rospy.loginfo("End of Cycle")
             # rospy.spin()
         except rospy.ROSInterruptException:
