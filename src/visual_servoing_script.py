@@ -7,10 +7,7 @@ import numpy
 from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image
 
-# global_name = rospy.get_param("/vs/video_feed_topic")
-
 focal_length_px = 580
-
 
 class VS:
     def __init__ (self, focal_length_px):
@@ -100,6 +97,17 @@ class Point(object):
         return img_modified
 
 
+def get_param():
+    global global_topic_name
+    global_topic_name = rospy.get_param("/visual_servoing_node/video_feed_topic")
+    global focal_length_pxl
+    focal_length_pxl = rospy.get_param("/visual_servoing_node/focal_length_pxl")
+    global padding_horizontal
+    padding_horizontal = rospy.get_param("/visual_servoing_node/padding_horizontal")
+    global padding_vertical
+    padding_vertical = rospy.get_param("/visual_servoing_node/padding_vertical")
+    
+
 def shutdown_function():
     rospy.loginfo("Thanks for using Visual Servoing - Shuting Down")
     robot_0.shutdown_function()
@@ -110,6 +118,13 @@ if __name__ == '__main__':
     rospy.init_node("visual_servoing_node")
     rate = rospy.Rate(10)
 
+    rospy.loginfo("Fetching parameters")
+    get_param()
+    print("global_topic_name is: " + str(global_topic_name))
+    print("focal_length_pxl is: " + str(focal_length_pxl))
+    print("padding_horizontal is: " + str(padding_horizontal))
+    print("padding_vertical is: " + str(padding_vertical))
+
     rospy.loginfo("Creation of instance of VS")
     robot_0 = VS(focal_length_px=580)
     rospy.on_shutdown(shutdown_function)
@@ -119,6 +134,7 @@ if __name__ == '__main__':
     point_2 = Point("Point_2", 400, 200, 200)
     point_3 = Point("Point_3", 300, 400, 200)
     list_of_point = [point_1, point_2, point_3]
+
 
     rospy.loginfo("Entering loop")
     while not rospy.is_shutdown():
