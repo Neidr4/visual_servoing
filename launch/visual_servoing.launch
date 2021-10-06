@@ -2,13 +2,13 @@
 
     <!-- Arguments -->
     <!-- default="/camera/image_raw" -->
-    <arg name="camera_feed_topic" value="/rms/camera1/image_raw"/>
+    <arg name="video_feed_topic" value="/rms/camera1/image_raw"/>
 
     <!-- Node -->
     <node pkg="visual_servoing" type="visual_servoing_script.py" name="visual_servoing_node" output="screen">
-        <!--
-        <param name="/vs/video_feed_topic" value="$(arg video_feed_topic)"/>
-        -->
+        
+        <param name="~video_feed_topic" type="str" value="$(arg video_feed_topic)"/>
+        
     </node>
 <!-- 
     <node name="image_view" pkg="image_view" type="image_view" respawn="false" output="screen">

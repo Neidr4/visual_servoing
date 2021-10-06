@@ -7,10 +7,7 @@ import numpy
 from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image
 
-# global_name = rospy.get_param("/vs/video_feed_topic")
-
 focal_length_px = 580
-
 
 class VS:
     def __init__ (self, focal_length_px):
@@ -99,6 +96,14 @@ class Point(object):
         img_modified = cv2.circle(img, center_coordinates, radius, color, thickness)
         return img_modified
 
+def get_param():
+    try:
+        global global_topic_name
+        global_topic_name = rospy.get_param("/visual_servoing_node/video_feed_topic")
+        pass
+    except rospy.KeyRaise as e:
+        raise e
+    
 
 def shutdown_function():
     rospy.loginfo("Thanks for using Visual Servoing - Shuting Down")
@@ -110,6 +115,11 @@ if __name__ == '__main__':
     rospy.init_node("visual_servoing_node")
     rate = rospy.Rate(10)
 
+    rospy.loginfo("Fetching parameters")
+    get_param()
+    print("global_topic_name is:" + str(global_topic_name))
+
+
     rospy.loginfo("Creation of instance of VS")
     robot_0 = VS(focal_length_px=580)
     rospy.on_shutdown(shutdown_function)
@@ -120,10 +130,17 @@ if __name__ == '__main__':
     point_3 = Point("Point_3", 300, 400, 200)
     list_of_point = [point_1, point_2, point_3]
 
+
     rospy.loginfo("Entering loop")
     while not rospy.is_shutdown():
         try:
             rospy.loginfo("Start of Cycle")
+
+            # if rospy.has_param('/visual_servoing_node/video_feed_topic'):
+                
+            #     print("global_topic_name is:" + str(global_topic_name))
+            # else:
+            #     print("did not found the parameter")
 
             point_1.add_circle(robot_0.cv_image)
             point_2.add_circle(robot_0.cv_image)
