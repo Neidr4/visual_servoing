@@ -96,13 +96,16 @@ class Point(object):
         img_modified = cv2.circle(img, center_coordinates, radius, color, thickness)
         return img_modified
 
+
 def get_param():
-    try:
-        global global_topic_name
-        global_topic_name = rospy.get_param("/visual_servoing_node/video_feed_topic")
-        pass
-    except rospy.KeyRaise as e:
-        raise e
+    global global_topic_name
+    global_topic_name = rospy.get_param("/visual_servoing_node/video_feed_topic")
+    global focal_length_pxl
+    focal_length_pxl = rospy.get_param("/visual_servoing_node/focal_length_pxl")
+    global padding_horizontal
+    padding_horizontal = rospy.get_param("/visual_servoing_node/padding_horizontal")
+    global padding_vertical
+    padding_vertical = rospy.get_param("/visual_servoing_node/padding_vertical")
     
 
 def shutdown_function():
@@ -117,8 +120,10 @@ if __name__ == '__main__':
 
     rospy.loginfo("Fetching parameters")
     get_param()
-    print("global_topic_name is:" + str(global_topic_name))
-
+    print("global_topic_name is: " + str(global_topic_name))
+    print("focal_length_pxl is: " + str(focal_length_pxl))
+    print("padding_horizontal is: " + str(padding_horizontal))
+    print("padding_vertical is: " + str(padding_vertical))
 
     rospy.loginfo("Creation of instance of VS")
     robot_0 = VS(focal_length_px=580)
@@ -135,12 +140,6 @@ if __name__ == '__main__':
     while not rospy.is_shutdown():
         try:
             rospy.loginfo("Start of Cycle")
-
-            # if rospy.has_param('/visual_servoing_node/video_feed_topic'):
-                
-            #     print("global_topic_name is:" + str(global_topic_name))
-            # else:
-            #     print("did not found the parameter")
 
             point_1.add_circle(robot_0.cv_image)
             point_2.add_circle(robot_0.cv_image)
