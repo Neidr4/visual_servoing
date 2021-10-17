@@ -11,15 +11,14 @@ focal_length_px = 580
 
 class VS:
     def __init__ (self, video_topic, focal_length_px):
-        # Subscriber
-        self.sub_cam = rospy.Subscriber(video_topic, 
-            Image, self.callback_cam)
         # Variables
+        self.init_camera = True
         self.bridge = CvBridge()
         self.cv_image = numpy.ndarray((480, 640, 4)) # Image()
         self.mask = numpy.ndarray((480, 640, 4)) # Image()
         self.image_with_circle = numpy.ndarray((480, 640, 4)) # Image()
         self.last_image = Image()
+        self.image_size = numpy.array([0, 0])
         self.triple_jacobian = numpy.empty((0, 6), float)
         self.focal_length_px = focal_length_px
 
@@ -31,9 +30,18 @@ class VS:
         self.yellow_lower = numpy.array([30, 80, 100])
         self.yellow_upper = numpy.array([60, 255, 255])
 
+        # Subscriber
+        self.sub_cam = rospy.Subscriber(video_topic, 
+            Image, self.callback_cam)
+
     def callback_cam(self, image_raw):
         try:
             self.cv_image = self.bridge.imgmsg_to_cv2(image_raw, "bgr8")
+            if self.init_camera == True:
+                self.image_size[0] = self.cv_image.shape[0]
+                self.image_size[1] = self.cv_image.shape[1]
+                self.init_camera == False
+                print("self.image_size = " + str(self.image_size))
         except CvBridgeError as e:
             print(e)
 
