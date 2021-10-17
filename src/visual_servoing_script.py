@@ -144,7 +144,7 @@ class Point(object):
         center_coordinates = tuple(center_coordinates_check)
 
         # Radius of circle
-        radius = 20
+        radius = 10
         # Blue color in BGR
         color = self.color
         # Line thickness of 2 px
@@ -187,9 +187,9 @@ if __name__ == '__main__':
 
     rospy.loginfo("Creation of three instance of Point")
 
-    desired_point_1 = Point("Desired_Point_1", 200, 200, 200, (255, 0, 255))
-    desired_point_2 = Point("Desired_Point_2", 400, 200, 200, (0, 255, 255))
-    desired_point_3 = Point("Desired_Point_3", 300, 400, 200, (255, 255, 0))
+    desired_point_1 = Point("Desired_Point_1", 360, 200, 200, (255, 0, 255))
+    desired_point_2 = Point("Desired_Point_2", 360, 300, 200, (0, 255, 255))
+    desired_point_3 = Point("Desired_Point_3", 360, 400, 200, (255, 255, 0))
     point_1 = Point("Point_1", 200, 200, 200, (0, 0, 255))
     point_2 = Point("Point_2", 400, 200, 200, (0, 255, 0))
     point_3 = Point("Point_3", 300, 400, 200, (255, 0, 0))
@@ -207,6 +207,9 @@ if __name__ == '__main__':
             else:
                 robot_0.get_features_pos()
 
+            robot_0.image_with_circle = desired_point_1.add_circle(robot_0.cv_image)
+            robot_0.image_with_circle = desired_point_2.add_circle(robot_0.cv_image)
+            robot_0.image_with_circle = desired_point_3.add_circle(robot_0.cv_image)
             robot_0.image_with_circle = point_1.add_circle(robot_0.cv_image)
             robot_0.image_with_circle = point_2.add_circle(robot_0.cv_image)
             robot_0.image_with_circle = point_3.add_circle(robot_0.cv_image)
