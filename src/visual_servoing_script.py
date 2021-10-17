@@ -40,8 +40,8 @@ class VS:
             if self.init_camera == True:
                 self.image_size[0] = self.cv_image.shape[0]
                 self.image_size[1] = self.cv_image.shape[1]
-                self.init_camera == False
-                print("self.image_size = " + str(self.image_size))
+                self.init_camera = False
+                rospy.loginfo("self.image_size = " + str(self.image_size))
         except CvBridgeError as e:
             print(e)
 
