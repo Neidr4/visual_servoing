@@ -36,12 +36,21 @@ class VS:
 
     def callback_cam(self, image_raw):
         try:
+            # Converting from ROS image to OpenCV
             self.cv_image = self.bridge.imgmsg_to_cv2(image_raw, "bgr8")
-            if self.init_camera == True:
+            if self.init_camera == True or desired_point_1.u == 0 or desired_point_2.u == 0 or desired_point_3.u == 0:
+                # Fetching the shape of the cv_image
                 self.image_size[0] = self.cv_image.shape[0]
                 self.image_size[1] = self.cv_image.shape[1]
+                # Assign u and v of each desired_point
+                desired_point_1.u = self.image_size[1]/2
+                desired_point_2.u = self.image_size[1]/2
+                desired_point_3.u = self.image_size[1]/2
+                desired_point_1.v = int(self.image_size[0]*0.33)
+                desired_point_2.v = int(self.image_size[0]*0.5)
+                desired_point_3.v = int(self.image_size[0]*0.66)
                 self.init_camera = False
-                rospy.loginfo("self.image_size = " + str(self.image_size))
+                rospy.loginfo("Init_camera image_size = " + str(self.image_size))
         except CvBridgeError as e:
             print(e)
 
@@ -77,15 +86,19 @@ class VS:
 
         for i in range(mask_rows):
             for j in range(mask_columns):
-                
+                # Checking if the color of the pixel is not black
                 if(self.mask[i, j] != 0):
+                    # Checking for first point
                     if(point_1.u == 0 and point_1.v == 0):
+                        # Assigning first point pos to point_1
                         point_1.u = j
                         point_1.v = i
-
+                    # Assigning each non-black point to point_3
+                    # The remaining point will be the last
                     point_3.u = j
                     point_3.v = i
 
+        # Computing the middle point u and v
         point_2.u = (point_1.u + point_3.u )/2
         point_2.v = (point_1.v + point_3.v )/2
 
@@ -195,9 +208,12 @@ if __name__ == '__main__':
 
     rospy.loginfo("Creation of three instance of Point")
 
-    desired_point_1 = Point("Desired_Point_1", 360, 200, 200, (255, 0, 255))
-    desired_point_2 = Point("Desired_Point_2", 360, 300, 200, (0, 255, 255))
-    desired_point_3 = Point("Desired_Point_3", 360, 400, 200, (255, 255, 0))
+   # desired_point_1 = Point("Desired_Point_1", 360, 200, 200, (255, 0, 255))
+   # desired_point_2 = Point("Desired_Point_2", 360, 300, 200, (0, 255, 255))
+   # desired_point_3 = Point("Desired_Point_3", 360, 400, 200, (255, 255, 0))
+    desired_point_1 = Point("Desired_Point_1", 0, 0, 200, (255, 0, 255))
+    desired_point_2 = Point("Desired_Point_2", 0, 0, 200, (0, 255, 255))
+    desired_point_3 = Point("Desired_Point_3", 0, 0, 200, (255, 255, 0))
     point_1 = Point("Point_1", 200, 200, 200, (0, 0, 255))
     point_2 = Point("Point_2", 400, 200, 200, (0, 255, 0))
     point_3 = Point("Point_3", 300, 400, 200, (255, 0, 0))
@@ -218,6 +234,9 @@ if __name__ == '__main__':
             robot_0.image_with_circle = desired_point_1.add_circle(robot_0.cv_image)
             robot_0.image_with_circle = desired_point_2.add_circle(robot_0.cv_image)
             robot_0.image_with_circle = desired_point_3.add_circle(robot_0.cv_image)
+            desired_point_1.print_coordinates()
+            desired_point_2.print_coordinates()
+            desired_point_3.print_coordinates()
             robot_0.image_with_circle = point_1.add_circle(robot_0.cv_image)
             robot_0.image_with_circle = point_2.add_circle(robot_0.cv_image)
             robot_0.image_with_circle = point_3.add_circle(robot_0.cv_image)
