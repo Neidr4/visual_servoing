@@ -35,6 +35,8 @@ class VS:
             Image, self.callback_cam)
 
     def callback_cam(self, image_raw):
+        global padding_horizontal
+        global padding_vertical
         try:
             # Converting from ROS image to OpenCV
             self.cv_image = self.bridge.imgmsg_to_cv2(image_raw, "bgr8")
@@ -43,12 +45,12 @@ class VS:
                 self.image_size[0] = self.cv_image.shape[0]
                 self.image_size[1] = self.cv_image.shape[1]
                 # Assign u and v of each desired_point
-                desired_point_1.u = self.image_size[1]/2
-                desired_point_2.u = self.image_size[1]/2
-                desired_point_3.u = self.image_size[1]/2
-                desired_point_1.v = int(self.image_size[0]*0.33)
-                desired_point_2.v = int(self.image_size[0]*0.5)
-                desired_point_3.v = int(self.image_size[0]*0.66)
+                desired_point_1.u = self.image_size[1]/2 + padding_horizontal
+                desired_point_2.u = self.image_size[1]/2 + padding_horizontal
+                desired_point_3.u = self.image_size[1]/2 + padding_horizontal
+                desired_point_1.v = int(self.image_size[0]*0.33) + padding_vertical
+                desired_point_2.v = int(self.image_size[0]*0.5) + padding_vertical
+                desired_point_3.v = int(self.image_size[0]*0.66) + padding_vertical
                 self.init_camera = False
                 rospy.loginfo("Init_camera image_size = " + str(self.image_size))
         except CvBridgeError as e:
