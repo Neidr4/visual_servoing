@@ -5,7 +5,7 @@
     <arg name="video_feed_topic" value="/rms/camera1/image_raw"/>
     <arg name="focal_length_pxl" value="580"/>
     <arg name="padding_horizontal" value="0"/>
-    <arg name="padding_vertical" value="0"/>
+    <arg name="padding_vertical" value="25"/>
 
     <!-- Node -->
     <node pkg="visual_servoing" type="visual_servoing_script.py" name="visual_servoing_node" output="screen">
