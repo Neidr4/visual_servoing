@@ -10,8 +10,9 @@ from sensor_msgs.msg import Image
 focal_length_px = 580
 
 class VS:
-    def __init__ (self, video_topic, focal_length_px):
+    def __init__ (self, name, video_topic, focal_length_px):
         # Variables
+        self.name = name
         self.init_camera = True
         self.bridge = CvBridge()
         self.cv_image = numpy.ndarray((480, 640, 4)) # Image()
@@ -33,6 +34,8 @@ class VS:
         # Subscriber
         self.sub_cam = rospy.Subscriber(video_topic, 
             Image, self.callback_cam)
+        image_pub_string = "/vs/" + str(self.name) + "/image_pub"
+        self.image_pub = rospy.Publisher(image_pub_string, Image)
 
     def callback_cam(self, image_raw):
         global padding_horizontal
@@ -127,6 +130,13 @@ class VS:
       #  else:
       #      print("press \"q\" for closing the window")
 
+    def publish_image(self, cv_image):
+        try:
+            self.image_pub.publish(self.bridge.cv2_to_imgmsg(cv_image, "bgr8"))
+        except CvBridgeError as e:
+            print(e)
+
+
     def shutdown_function(self):
         # cv2.waitKey(0)
         cv2.destroyAllWindows()
@@ -204,7 +214,8 @@ if __name__ == '__main__':
     get_param()
 
     rospy.loginfo("Creation of instance of VS")
-    robot_0 = VS(video_topic=video_feed_topic, 
+    robot_0 = VS(name="robot_0",
+        video_topic=video_feed_topic, 
         focal_length_px=focal_length_pxl)
     rospy.on_shutdown(shutdown_function)
 
@@ -232,6 +243,7 @@ if __name__ == '__main__':
                 first_try = 1
             else:
                 robot_0.get_features_pos()
+                robot_0.publish_image(robot_0.image_with_circle)
 
             robot_0.image_with_circle = desired_point_1.add_circle(robot_0.cv_image)
             robot_0.image_with_circle = desired_point_2.add_circle(robot_0.cv_image)
@@ -247,9 +259,10 @@ if __name__ == '__main__':
             robot_0.mask = point_2.add_circle(robot_0.cv_image)
             robot_0.mask = point_3.add_circle(robot_0.cv_image)
 
+
             robot_0.display_image("robot_0_mask", robot_0.mask)
-            robot_0.display_image("robot_0_image_with_circle", 
-                robot_0.image_with_circle)
+            # robot_0.display_image("robot_0_image_with_circle", 
+            #    robot_0.image_with_circle)
 
             robot_0.compute_ij(list_of_point)
 

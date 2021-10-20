@@ -16,11 +16,15 @@
         <param name="~padding_vertical" type="int" value="$(arg padding_vertical)"/>
         
     </node>
-<!-- 
-    <node name="image_view" pkg="image_view" type="image_view" respawn="false" output="screen">
+
+    <node name="image_view_vspub" pkg="image_view" type="image_view" respawn="false" output="screen">
+        <remap from="image" to="/vs/robot_0/image_pub"/>
+    </node>
+    <!-- 
+    <node name="image_view_feed" pkg="image_view" type="image_view" respawn="false" output="screen">
         <remap from="image" to="$(arg camera_feed_topic)"/>
     </node>
- -->
+     -->
     <!--
     <group ns="/vs">
     
