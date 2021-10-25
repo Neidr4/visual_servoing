@@ -38,22 +38,13 @@ class VS:
         self.image_pub = rospy.Publisher(image_pub_string, Image)
 
     def callback_cam(self, image_raw):
-        global padding_horizontal
-        global padding_vertical
         try:
             # Converting from ROS image to OpenCV
             self.cv_image = self.bridge.imgmsg_to_cv2(image_raw, "bgr8")
-            if self.init_camera == True or desired_point_1.u == 0 or desired_point_2.u == 0 or desired_point_3.u == 0:
+            if self.init_camera == True:
                 # Fetching the shape of the cv_image
                 self.image_size[0] = self.cv_image.shape[0]
                 self.image_size[1] = self.cv_image.shape[1]
-                # Assign u and v of each desired_point
-                desired_point_1.u = self.image_size[1]/2 + padding_horizontal
-                desired_point_2.u = self.image_size[1]/2 + padding_horizontal
-                desired_point_3.u = self.image_size[1]/2 + padding_horizontal
-                desired_point_1.v = int(self.image_size[0]*0.33) + padding_vertical
-                desired_point_2.v = int(self.image_size[0]*0.5) + padding_vertical
-                desired_point_3.v = int(self.image_size[0]*0.66) + padding_vertical
                 self.init_camera = False
                 rospy.loginfo("Init_camera image_size = " + str(self.image_size))
         except CvBridgeError as e:
@@ -71,7 +62,7 @@ class VS:
                     jacobian_matrix, axis=0)
             else:
                 rospy.loginfo("The argment passed in compute_ij, is not Point")
-        print("robot_0.triple_jacobian size is: " + str(self.triple_jacobian.shape))
+        #print("robot_0.triple_jacobian size is: " + str(self.triple_jacobian.shape))
 
     def get_features_pos(self):
         hsv = cv2.cvtColor(self.cv_image, cv2.COLOR_BGR2HSV)
@@ -107,9 +98,9 @@ class VS:
         point_2.u = (point_1.u + point_3.u )/2
         point_2.v = (point_1.v + point_3.v )/2
 
-        point_1.print_coordinates()
-        point_2.print_coordinates()
-        point_3.print_coordinates()
+      #  point_1.print_coordinates()
+      #  point_2.print_coordinates()
+      #  point_3.print_coordinates()
 
       #  self.mask = point_1.add_circle(self.mask)
       #  self.mask = point_3.add_circle(self.mask)
@@ -194,10 +185,18 @@ def get_param():
     video_feed_topic = rospy.get_param("/visual_servoing_node/video_feed_topic")
     global focal_length_pxl
     focal_length_pxl = rospy.get_param("/visual_servoing_node/focal_length_pxl")
-    global padding_horizontal
-    padding_horizontal = rospy.get_param("/visual_servoing_node/padding_horizontal")
-    global padding_vertical
-    padding_vertical = rospy.get_param("/visual_servoing_node/padding_vertical")
+    global desired_point_1_x
+    desired_point_1_x = rospy.get_param("/visual_servoing_node/desired_point_1_x")
+    global desired_point_1_y
+    desired_point_1_y = rospy.get_param("/visual_servoing_node/desired_point_1_y")
+    global desired_point_2_x
+    desired_point_2_x = rospy.get_param("/visual_servoing_node/desired_point_2_x")
+    global desired_point_2_y
+    desired_point_2_y = rospy.get_param("/visual_servoing_node/desired_point_2_y")
+    global desired_point_3_x
+    desired_point_3_x = rospy.get_param("/visual_servoing_node/desired_point_3_x")
+    global desired_point_3_y
+    desired_point_3_y = rospy.get_param("/visual_servoing_node/desired_point_3_y")
     
 
 def shutdown_function():
@@ -224,9 +223,9 @@ if __name__ == '__main__':
    # desired_point_1 = Point("Desired_Point_1", 360, 200, 200, (255, 0, 255))
    # desired_point_2 = Point("Desired_Point_2", 360, 300, 200, (0, 255, 255))
    # desired_point_3 = Point("Desired_Point_3", 360, 400, 200, (255, 255, 0))
-    desired_point_1 = Point("Desired_Point_1", 0, 0, 200, (255, 0, 255))
-    desired_point_2 = Point("Desired_Point_2", 0, 0, 200, (0, 255, 255))
-    desired_point_3 = Point("Desired_Point_3", 0, 0, 200, (255, 255, 0))
+    desired_point_1 = Point("Desired_Point_1", desired_point_1_x, desired_point_1_y, 200, (255, 0, 255))
+    desired_point_2 = Point("Desired_Point_2", desired_point_2_x, desired_point_2_y, 200, (0, 255, 255))
+    desired_point_3 = Point("Desired_Point_3", desired_point_3_x, desired_point_3_y, 200, (255, 255, 0))
     point_1 = Point("Point_1", 200, 200, 200, (0, 0, 255))
     point_2 = Point("Point_2", 400, 200, 200, (0, 255, 0))
     point_3 = Point("Point_3", 300, 400, 200, (255, 0, 0))
@@ -248,9 +247,9 @@ if __name__ == '__main__':
             robot_0.image_with_circle = desired_point_1.add_circle(robot_0.cv_image)
             robot_0.image_with_circle = desired_point_2.add_circle(robot_0.cv_image)
             robot_0.image_with_circle = desired_point_3.add_circle(robot_0.cv_image)
-            desired_point_1.print_coordinates()
-            desired_point_2.print_coordinates()
-            desired_point_3.print_coordinates()
+          #  desired_point_1.print_coordinates()
+          #  desired_point_2.print_coordinates()
+          #  desired_point_3.print_coordinates()
             robot_0.image_with_circle = point_1.add_circle(robot_0.cv_image)
             robot_0.image_with_circle = point_2.add_circle(robot_0.cv_image)
             robot_0.image_with_circle = point_3.add_circle(robot_0.cv_image)
