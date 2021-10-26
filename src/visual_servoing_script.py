@@ -179,6 +179,17 @@ class Point(object):
         img_modified = cv2.circle(img, center_coordinates, radius, color, thickness)
         return img_modified
 
+    def distance_from(self, other_point):
+        if isinstance (other_point, Point):
+            u = self.u - other_point.u
+            v = self.v - other_point.v
+            distance_tuple = (u, -v)
+            print("distance between the two points: " + str(distance_tuple))
+            return distance_tuple
+        else:
+            print("Parameters passed is not a point")
+            return 0
+
 
 def get_param():
     global video_feed_topic
@@ -258,12 +269,15 @@ if __name__ == '__main__':
             robot_0.mask = point_2.add_circle(robot_0.cv_image)
             robot_0.mask = point_3.add_circle(robot_0.cv_image)
 
-
             robot_0.display_image("robot_0_mask", robot_0.mask)
-            # robot_0.display_image("robot_0_image_with_circle", 
-            #    robot_0.image_with_circle)
 
             robot_0.compute_ij(list_of_point)
+            print("desired_point_1.distance_from(point_1): " + 
+                    str(desired_point_1.distance_from(point_1)))
+            print("desired_point_2.distance_from(point_2): " + 
+                    str(desired_point_2.distance_from(point_2)))
+            print("desired_point_3.distance_from(point_3): " + 
+                    str(desired_point_3.distance_from(point_3)))
 
             rate.sleep()
             rospy.loginfo("End of Cycle")
