@@ -108,6 +108,12 @@ class VS:
       #  cv2.waitKey(0)
       #  cv2.destroyAllWindows()
 
+    def compute_desired_vel(self, speed):
+        d1star = desired_point_1.distance_from(point_1)
+        d2star = desired_point_2.distance_from(point_2)
+        d3star = desired_point_3.distance_from(point_3)
+        desired_pxl_vel = speed*numpy.matrix([[d1star[0]], [d1star[0]], [d2star[0]], [d2star[1]], [d3star[0]], [d3star[1]]])
+        return desired_pxl_vel
 
     def clear_jacobian(self):
         self.triple_jacobian = numpy.empty((0, 6), float)
@@ -126,7 +132,6 @@ class VS:
             self.image_pub.publish(self.bridge.cv2_to_imgmsg(cv_image, "bgr8"))
         except CvBridgeError as e:
             print(e)
-
 
     def shutdown_function(self):
         # cv2.waitKey(0)
@@ -178,6 +183,17 @@ class Point(object):
         # Draw a circle with blue line borders of thickness of 2 px
         img_modified = cv2.circle(img, center_coordinates, radius, color, thickness)
         return img_modified
+
+    def distance_from(self, other_point):
+        if isinstance (other_point, Point):
+            u = self.u - other_point.u
+            v = self.v - other_point.v
+            distance_tuple = (u, -v)
+            print("distance between the two points: " + str(distance_tuple))
+            return distance_tuple
+        else:
+            print("Parameters passed is not a point")
+            return 0
 
 
 def get_param():
@@ -247,24 +263,16 @@ if __name__ == '__main__':
             robot_0.image_with_circle = desired_point_1.add_circle(robot_0.cv_image)
             robot_0.image_with_circle = desired_point_2.add_circle(robot_0.cv_image)
             robot_0.image_with_circle = desired_point_3.add_circle(robot_0.cv_image)
-          #  desired_point_1.print_coordinates()
-          #  desired_point_2.print_coordinates()
-          #  desired_point_3.print_coordinates()
             robot_0.image_with_circle = point_1.add_circle(robot_0.cv_image)
             robot_0.image_with_circle = point_2.add_circle(robot_0.cv_image)
             robot_0.image_with_circle = point_3.add_circle(robot_0.cv_image)
 
-            robot_0.mask = point_1.add_circle(robot_0.cv_image)
-            robot_0.mask = point_2.add_circle(robot_0.cv_image)
-            robot_0.mask = point_3.add_circle(robot_0.cv_image)
-
-
-            robot_0.display_image("robot_0_mask", robot_0.mask)
-            # robot_0.display_image("robot_0_image_with_circle", 
-            #    robot_0.image_with_circle)
+            robot_0.display_image("robot_0_cv_image", robot_0.cv_image)
 
             robot_0.compute_ij(list_of_point)
 
+            print("desired_vel with a coef of 2 is: \n" + str(robot_0.compute_desired_vel(2)))
+            
             rate.sleep()
             rospy.loginfo("End of Cycle")
             # rospy.spin()
